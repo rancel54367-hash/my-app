@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Preview Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.light {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        body.dark {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        .header {
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid;
+            min-height: 60px;
+        }
+
+        .light .header {
+            background-color: #fff;
+            border-bottom-color: #ddd;
+        }
+
+        .dark .header {
+            background-color: #2d2d2d;
+            border-bottom-color: #3d3d3d;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        button {
+            padding: 10px 22px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            min-width: 100px;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        button:active {
+            background-color: #444;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            left: 0;
+            top: 0;
+        }
+
+        .file-info {
+            font-size: 13px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .light .file-info {
+            background-color: #e8e8e8;
+            color: #555;
+        }
+
+        .dark .file-info {
+            background-color: #3a3a3a;
+            color: #aaa;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 60px);
+        }
+
+        .editor-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid;
+        }
+
+        .light .editor-section {
+            border-bottom-color: #ddd;
+        }
+
+        .dark .editor-section {
+            border-bottom-color: #3d3d3d;
+        }
+
+        .section-title {
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid;
+            letter-spacing: 0.3px;
+        }
+
+        .light .section-title {
+            background-color: #fafafa;
+            border-bottom-color: #ddd;
+        }
+
+        .dark .section-title {
+            background-color: #252525;
+            border-bottom-color: #3d3d3d;
+        }
+
+        #htmlEditor {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+        }
+
+        .light #htmlEditor {
+            background-color: #fff;
+            color: #333;
+        }
+
+        .dark #htmlEditor {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+
+        .preview-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #preview {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+
+        .light #preview {
+            background-color: #fff;
+        }
+
+        .dark #preview {
+            background-color: #2d2d2d;
+        }
+
+        /* Selalu gunakan layout vertikal (editor atas, preview bawah) */
+        .main-container {
+            flex-direction: column !important;
+        }
+        
+        .editor-section,
+        .preview-section {
+            min-height: 50%;
+        }
+
+        /* Mobile tetap vertikal layout dengan proporsi yang baik */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 16px;
+            }
+
+            .header {
+                padding: 12px 15px;
+                min-height: 50px;
+            }
+
+            .controls {
+                gap: 8px;
+            }
+
+            .controls button {
+                padding: 8px 14px;
+                font-size: 12px;
+                min-width: 80px;
+            }
+
+            .file-info {
+                font-size: 11px;
+                padding: 8px 12px;
+                min-width: 100px;
+            }
+
+            .section-title {
+                font-size: 12px;
+                padding: 10px 15px;
+            }
+
+            #htmlEditor {
+                font-size: 12px;
+                padding: 15px;
+            }
+
+            .main-container {
+                height: calc(100vh - 50px);
+            }
+        }
+    </style>
+</head>
+<body class="dark">
+    <div class="header">
+        <h1>HTML Preview Editor</h1>
+        <div class="controls">
+            <div class="file-input-wrapper">
+                <button>Upload HTML</button>
+                <input type="file" id="fileInput" accept=".html,.htm">
+            </div>
+            <button id="clearBtn">Clear</button>
+            <button id="themeToggle">🌙 Mode Gelap</button>
+            <div class="file-info" id="fileInfo">Ukuran: 0 KB</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="editor-section">
+            <div class="section-title">Editor HTML</div>
+            <textarea id="htmlEditor" spellcheck="false" placeholder="Upload file HTML atau ketik kode di sini..."></textarea>
+        </div>
+
+        <div class="preview-section">
+            <div class="section-title">Preview</div>
+            <iframe id="preview"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const htmlEditor = document.getElementById('htmlEditor');
+        const preview = document.getElementById('preview');
+        const fileInput = document.getElementById('fileInput');
+        const clearBtn = document.getElementById('clearBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const fileInfo = document.getElementById('fileInfo');
+        const body = document.body;
+
+        // Update preview
+        function updatePreview() {
+            const htmlContent = htmlEditor.value;
+            preview.srcdoc = htmlContent;
+            updateFileSize();
+        }
+
+        // Update file size
+        function updateFileSize() {
+            const bytes = new Blob([htmlEditor.value]).size;
+            const kb = (bytes / 1024).toFixed(2);
+            const mb = (bytes / (1024 * 1024)).toFixed(2);
+            
+            if (bytes < 1024 * 1024) {
+                fileInfo.textContent = `Ukuran: ${kb} KB`;
+            } else {
+                fileInfo.textContent = `Ukuran: ${mb} MB`;
+            }
+        }
+
+        // File upload - langsung bisa pilih file
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    htmlEditor.value = e.target.result;
+                    updatePreview();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Clear editor
+        clearBtn.addEventListener('click', function() {
+            if (confirm('Hapus semua kode HTML?')) {
+                htmlEditor.value = '';
+                updatePreview();
+            }
+        });
+
+        // Theme toggle
+        let isDark = true;
+        themeToggle.addEventListener('click', function() {
+            if (isDark) {
+                body.classList.remove('dark');
+                body.classList.add('light');
+                themeToggle.textContent = '☀️ Mode Terang';
+                isDark = false;
+            } else {
+                body.classList.remove('light');
+                body.classList.add('dark');
+                themeToggle.textContent = '🌙 Mode Gelap';
+                isDark = true;
+            }
+        });
+
+        // Auto-update preview
+        htmlEditor.addEventListener('input', updatePreview);
+
+        // Initial preview
+        updatePreview();
+
+        // Tab support in textarea
+        htmlEditor.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
+    </script>
+</body>
+</html>
