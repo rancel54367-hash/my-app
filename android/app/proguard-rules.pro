@@ -1,0 +1,3 @@
+-keep class com.getcapacitor.** { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+-dontwarn com.getcapacitor.**
